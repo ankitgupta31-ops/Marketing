@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://saarthifinance.in/sitemap.xml
