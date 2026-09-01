@@ -1,26 +1,5 @@
 const menuToggle = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.main-nav');
-const languageToggle = document.querySelector('[data-language-toggle]');
-const languageText = {
-  en: { pay: 'Pay EMI', apply: 'Apply now', hero: 'Keep moving.', heroSecond: 'Keep earning.', eligibility: 'Check your eligibility', payment: 'Make an EMI payment', method: 'Payment method', continue: 'Continue to payment' },
-  hi: { pay: 'EMI जमा करें', apply: 'अभी आवेदन करें', hero: 'चलते रहिए।', heroSecond: 'कमाते रहिए।', eligibility: 'अपनी पात्रता जांचें', payment: 'EMI भुगतान करें', method: 'भुगतान का तरीका', continue: 'भुगतान के लिए आगे बढ़ें' }
-};
-let currentLanguage = 'en';
-
-languageToggle?.addEventListener('click', () => {
-  currentLanguage = currentLanguage === 'en' ? 'hi' : 'en';
-  const copy = languageText[currentLanguage];
-  document.documentElement.lang = currentLanguage === 'hi' ? 'hi' : 'en';
-  document.querySelector('.text-link').textContent = copy.pay;
-  document.querySelector('.button-small').innerHTML = `${copy.apply} <span aria-hidden="true">↗</span>`;
-  document.querySelector('.hero h1').innerHTML = `${copy.hero}<br><em>${copy.heroSecond}</em>`;
-  document.querySelector('.hero-actions .button').innerHTML = `${copy.eligibility} <span aria-hidden="true">↗</span>`;
-  document.querySelector('.payment-card h3').textContent = copy.payment;
-  document.querySelector('.payment-methods legend').textContent = copy.method;
-  document.querySelector('#payment-form button').innerHTML = `${copy.continue} <span aria-hidden="true">↗</span>`;
-  languageToggle.textContent = currentLanguage === 'en' ? 'हिंदी' : 'English';
-  languageToggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Hindi' : 'Switch to English');
-});
 
 menuToggle?.addEventListener('click', () => {
   const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
