@@ -45,8 +45,12 @@ const submitFormToMail = async (form, successMessage, successButtonText) => {
   } catch (error) {
     if (message) {
       message.textContent = 'There was a problem sending your form. Please email ankitgupta31@gmail.com directly.';
-  );
-});
+    }
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
+  }
+};
+
 
 document.querySelector('#apply-form')?.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -92,24 +96,35 @@ quoteModal?.querySelector('#quote-form')?.addEventListener('submit', async (even
 const calculatorForm = document.querySelector('#calculator-form');
 const formatCurrency = (value) => `₹${Math.round(value).toLocaleString('en-IN')}`;
 
-function updateCalculator() {
-  if (!calculatorForm) return;
+function updateCalculatorDisplay() {
   const amount = Number(document.querySelector('#calc-amount').value);
   const rate = Number(document.querySelector('#calc-rate').value);
   const months = Number(document.querySelector('#calc-tenure').value);
+
   const monthlyRate = rate / 1200;
-  const reducingEmi = monthlyRate === 0 ? amount / months : amount * monthlyRate * ((1 + monthlyRate) ** months) / (((1 + monthlyRate) ** months) - 1);
-  const flatInterest = amount * (rate / 100) * (months / 12);
-  const flatEmi = (amount + flatInterest) / months;
+  const emi = monthlyRate === 0
+    ? amount / months
+    : amount * monthlyRate * ((1 + monthlyRate) ** months) / (((1 + monthlyRate) ** months) - 1);
+  const totalInterest = (emi * months) - amount;
 
   document.querySelector('#amount-output').textContent = formatCurrency(amount);
   document.querySelector('#rate-output').textContent = `${rate}%`;
   document.querySelector('#tenure-output').textContent = `${months} months`;
-  document.querySelector('#reducing-emi').textContent = formatCurrency(reducingEmi);
-  document.querySelector('#reducing-interest').textContent = formatCurrency((reducingEmi * months) - amount);
-  document.querySelector('#flat-emi').textContent = formatCurrency(flatEmi);
-  document.querySelector('#flat-interest').textContent = formatCurrency(flatInterest);
+  document.querySelector('#reducing-emi').textContent = formatCurrency(emi);
+  document.querySelector('#reducing-interest').textContent = formatCurrency(totalInterest);
 }
 
-calculatorForm?.querySelectorAll('input').forEach((input) => input.addEventListener('input', updateCalculator));
-updateCalculator();
+calculatorForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  updateCalculatorDisplay();
+});
+
+calculatorForm?.querySelectorAll('input').forEach((input) => {
+  input.addEventListener('input', () => {
+    document.querySelector('#amount-output').textContent = formatCurrency(Number(document.querySelector('#calc-amount').value));
+    document.querySelector('#rate-output').textContent = `${Number(document.querySelector('#calc-rate').value)}%`;
+    document.querySelector('#tenure-output').textContent = `${Number(document.querySelector('#calc-tenure').value)} months`;
+  });
+});
+
+updateCalculatorDisplay();
