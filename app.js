@@ -105,13 +105,10 @@ function updateCalculatorDisplay() {
   const emi = monthlyRate === 0
     ? amount / months
     : amount * monthlyRate * ((1 + monthlyRate) ** months) / (((1 + monthlyRate) ** months) - 1);
-  const totalInterest = (emi * months) - amount;
-
   document.querySelector('#amount-output').textContent = formatCurrency(amount);
-  document.querySelector('#rate-output').textContent = `${rate}%`;
+  document.querySelector('#rate-output').textContent = `${rate}% (per annum)`;
   document.querySelector('#tenure-output').textContent = `${months} months`;
   document.querySelector('#reducing-emi').textContent = formatCurrency(emi);
-  document.querySelector('#reducing-interest').textContent = formatCurrency(totalInterest);
 }
 
 calculatorForm?.addEventListener('submit', (event) => {
@@ -122,9 +119,25 @@ calculatorForm?.addEventListener('submit', (event) => {
 calculatorForm?.querySelectorAll('input').forEach((input) => {
   input.addEventListener('input', () => {
     document.querySelector('#amount-output').textContent = formatCurrency(Number(document.querySelector('#calc-amount').value));
-    document.querySelector('#rate-output').textContent = `${Number(document.querySelector('#calc-rate').value)}%`;
+    document.querySelector('#rate-output').textContent = `${Number(document.querySelector('#calc-rate').value)}% (per annum)`;
     document.querySelector('#tenure-output').textContent = `${Number(document.querySelector('#calc-tenure').value)} months`;
+    updateCalculatorDisplay();
   });
 });
 
 updateCalculatorDisplay();
+
+document.querySelector('#calculator-reset')?.addEventListener('click', () => {
+  document.querySelector('#calc-amount').value = '20000';
+  document.querySelector('#calc-tenure').value = '12';
+  document.querySelector('#calc-rate').value = '12';
+  updateCalculatorDisplay();
+});
+
+document.querySelector('#newsletter-form')?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const message = document.querySelector('#newsletter-message');
+  if (message) message.textContent = 'You are on the list. Thank you.';
+  form.reset();
+});
