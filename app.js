@@ -64,6 +64,7 @@ document.querySelector('#apply-form')?.addEventListener('submit', async (event) 
 
 const quoteModal = document.querySelector('#quote-modal');
 const quoteTriggers = document.querySelectorAll('a[href="#apply"]');
+const applicationUrl = 'https://vridoracapital.roopya.money/customer/personal_loan/a4e692d6381b9b3e0a1830a6c4f7581b6089aa571a8c70dd5f9ea22d3ce3181a/eb27b624defa133f8cc53a14f0de5beb65acaf1b0adde6f87955280afadc10fd';
 const closeQuoteModal = () => {
   if (!quoteModal) return;
   quoteModal.hidden = true;
@@ -71,10 +72,7 @@ const closeQuoteModal = () => {
 };
 const openQuoteModal = (event) => {
   event.preventDefault();
-  if (!quoteModal) return;
-  quoteModal.hidden = false;
-  document.body.classList.add('quote-modal-open');
-  quoteModal.querySelector('input')?.focus();
+  window.open(applicationUrl, '_blank', 'noopener');
 };
 
 quoteTriggers.forEach((trigger) => trigger.addEventListener('click', openQuoteModal));
