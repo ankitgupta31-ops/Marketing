@@ -1,16 +1,16 @@
 <?php
 header('Content-Type: application/json; charset=UTF-8');
 
-$emailTo = getenv('EMAIL_TO') ?: 'ankitgupta31@gmail.com';
+$emailTo = getenv('EMAIL_TO') ?: 'info@vridoracapital.com';
 $allowedForms = ['payment-form', 'apply-form', 'quote-form'];
 
 function getSmtpConfig() {
     $smtpHost = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
     $smtpPort = getenv('SMTP_PORT') ?: '587';
-    $smtpUser = getenv('SMTP_USER') ?: 'ankitgupta31@gmail.com';
+    $smtpUser = getenv('SMTP_USER') ?: 'info@vridoracapital.com';
     $smtpPass = getenv('SMTP_PASS') ?: '';
     $smtpSecure = getenv('SMTP_SECURE') ?: 'tls';
-    $fromEmail = getenv('SMTP_FROM') ?: 'ankitgupta31@gmail.com';
+    $fromEmail = getenv('SMTP_FROM') ?: 'info@vridoracapital.com';
 
     return [$smtpHost, (int) $smtpPort, $smtpUser, $smtpPass, $smtpSecure, $fromEmail];
 }
@@ -174,7 +174,7 @@ if (empty($fields)) {
     exit;
 }
 
-$subject = 'Saarthi Finance form submission: ' . ucfirst(str_replace('-', ' ', $formType));
+$subject = 'Vridora Capital form submission: ' . ucfirst(str_replace('-', ' ', $formType));
 $bodyLines = [];
 $bodyLines[] = 'Form type: ' . $formType;
 $bodyLines[] = 'Submitted at: ' . date('Y-m-d H:i:s');

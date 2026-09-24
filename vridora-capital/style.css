@@ -1,0 +1,11 @@
+/*
+Theme Name: Vridora Capital
+Theme URI: https://vridoracapital.com
+Author: Vridora Capital
+Description: Responsive lending website for e-rickshaw and three-wheeler finance.
+Version: 1.0.0
+Requires at least: 6.0
+Requires PHP: 7.4
+Text Domain: vridora-capital
+*/
+@import url('../styles.css');

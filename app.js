@@ -6,7 +6,6 @@ menuToggle?.addEventListener('click', () => {
   menuToggle.setAttribute('aria-expanded', String(!isOpen));
   nav?.classList.toggle('nav-open', !isOpen);
 });
-
 document.querySelectorAll('.main-nav a').forEach((link) => {
   link.addEventListener('click', () => {
     menuToggle?.setAttribute('aria-expanded', 'false');
@@ -44,7 +43,7 @@ const submitFormToMail = async (form, successMessage, successButtonText) => {
     form.reset();
   } catch (error) {
     if (message) {
-      message.textContent = 'There was a problem sending your form. Please email ankitgupta31@gmail.com directly.';
+      message.textContent = 'There was a problem sending your form. Please email info@vridoracapital.com directly.';
     }
     submitButton.disabled = false;
     submitButton.textContent = originalText;
@@ -132,10 +131,3 @@ document.querySelector('#calculator-reset')?.addEventListener('click', () => {
   updateCalculatorDisplay();
 });
 
-document.querySelector('#newsletter-form')?.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const message = document.querySelector('#newsletter-message');
-  if (message) message.textContent = 'You are on the list. Thank you.';
-  form.reset();
-});
