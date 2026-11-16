@@ -1,20 +1,15 @@
-const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
-const amountKeys = ['emiamount', 'emidueamount', 'dueemiamount', 'installmentamount', 'amountdue', 'dueamount', 'payableamount', 'currentemi', 'nextemiamount', 'overdueemi'];
+const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'loandtlsid', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
 
 function collectLoanRecords(value, records = [], seen = new Set()) {
   if (!value || typeof value !== 'object') return records;
   if (Array.isArray(value)) {
     value.forEach((item) => {
-      if (item && typeof item === 'object' && !Array.isArray(item) && Object.keys(item).some((key) => /loan|emi|installment|due|outstanding|balance|account|amount/i.test(key)) && !seen.has(item)) {
-        seen.add(item);
-        records.push(item);
-      }
       collectLoanRecords(item, records, seen);
     });
     return records;
   }
-  const hasLoanFields = Object.entries(value).some(([key, child]) => /loan|emi|installment|due|outstanding|balance|account|amount/i.test(key) && child != null && typeof child !== 'object');
-  if (hasLoanFields && !seen.has(value)) {
+  const hasLoanIdentifier = Object.entries(value).some(([key, child]) => loanIdentifierKeys.includes(key.toLowerCase().replace(/[^a-z0-9]/g, '')) && child != null && typeof child !== 'object');
+  if (hasLoanIdentifier && !seen.has(value)) {
     seen.add(value);
     records.push(value);
   }
@@ -75,9 +70,13 @@ export default async function handler(request, response) {
 
     const contactId = findField(loan, ['contactid']);
     const leadId = findField(loan, ['leadid']);
-    const amount = Number(findField(loan, amountKeys));
+    const amount = Number(loan.upcoming_emi?.amount);
+    const pipelineId = Number(loan.pipeline_id || process.env.ROOPYA_PIPELINE_ID || 2094);
     if (!contactId || !leadId || !Number.isFinite(amount) || amount <= 0) {
       return response.status(422).json({ message: 'Required payment details were not returned for this loan. Please contact support.' });
+    }
+    if (!Number.isSafeInteger(pipelineId) || pipelineId <= 0) {
+      return response.status(422).json({ message: 'The payment pipeline is not configured correctly.' });
     }
 
     const paymentResponse = await fetch('https://api.roopya.money/api/v2/processing-fee/create-paymentLink-partner', {
@@ -89,7 +88,7 @@ export default async function handler(request, response) {
         amount,
         contact_id: contactId,
         lead_id: leadId,
-        pipeline_id: Number(process.env.ROOPYA_PIPELINE_ID || 2094),
+        pipeline_id: pipelineId,
         description: 'emi payment',
         reason: 'emi payment',
         payment_type: 'payment_link'

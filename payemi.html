@@ -14,7 +14,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; }
     .payemi-main { min-height: 620px; display: grid; place-items: center; padding: 72px 24px; }
-    .payemi-card { position: relative; width: min(100%, 470px); padding: 25px 24px 27px; background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 16px 40px rgba(25,49,45,.14); }
+    .payemi-card { position: relative; width: min(100%, 566px); padding: 38px 42px 32px; background: #fff; border: 1px solid #e6eee9; border-radius: 36px; box-shadow: 0 16px 40px rgba(25,49,45,.08); }
     .close-link { position: absolute; top: 17px; right: 18px; color: #65717e; font-size: 26px; line-height: 1; text-decoration: none; }
     .payemi-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 50%; background: #e8f4ff; color: var(--blue); font-size: 34px; }
     h1 { margin: 0; color: #202985; text-align: center; font: 700 24px 'Space Grotesk', sans-serif; }
@@ -30,23 +30,63 @@
     .security-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 22px; padding-top: 17px; border-top: 1px solid var(--line); color: #6e7785; font-size: 12px; }
     .security-note span { color: #65717e; font-size: 18px; }
     .form-message { min-height: 18px; margin-top: 10px; color: #bd604e; text-align: center; font-size: 12px; }
-    .loan-results { display: grid; gap: 12px; margin-top: 22px; }
+    .loan-results { display: grid; gap: 16px; margin-top: 22px; }
     .loan-results[hidden] { display: none; }
-    .loan-results h2 { margin: 0; color: var(--ink); font: 600 18px 'Space Grotesk', sans-serif; }
-    .loan-list { display: grid; gap: 10px; }
+    .payemi-card.loan-mode .close-link, .payemi-card.loan-mode .payemi-icon, .payemi-card.loan-mode #payemi-title, .payemi-card.loan-mode .intro, .payemi-card.loan-mode #pan-form { display: none; }
+    .loan-results-mode .site-header, .loan-results-mode .site-footer { display: none; }
+    .loan-results-mode .payemi-main { min-height: 100vh; padding: 20px; }
+    .payemi-card.loan-mode .loan-results { margin-top: 0; }
+    .different-pan { justify-self: start; border: 0; padding: 0; background: transparent; color: #239447; font: 700 16px 'DM Sans', sans-serif; cursor: pointer; }
+    .different-pan span { margin-right: 6px; }
+    .loan-results h2 { margin: 0; color: #211f1e; font: 700 30px 'Space Grotesk', sans-serif; }
+    .loan-results-intro { margin: -8px 0 6px; color: #737373; font-size: 18px; }
+    .loan-results-intro[hidden] { display: none; }
+    .loan-list { display: grid; gap: 14px; }
+    .no-loans { border: 1px dashed #d6dfd9; border-radius: 17px; padding: 34px 24px; background: #f7faf8; text-align: center; }
+    .no-loans h3 { margin: 0 0 12px; color: #262523; font: 700 22px 'Space Grotesk', sans-serif; }
+    .no-loans p { max-width: 440px; margin: 0 auto; color: #858785; font-size: 17px; line-height: 1.55; }
     .loan-choice { display: block; margin: 0; cursor: pointer; }
     .loan-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-    .loan-choice-card { display: block; border: 1px solid #cbd3dd; border-radius: 6px; padding: 13px; }
-    .loan-choice input:checked + .loan-choice-card { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(8,118,209,.13); }
-    .loan-choice input:focus-visible + .loan-choice-card { outline: 2px solid var(--blue); outline-offset: 2px; }
-    .loan-choice-card strong { display: block; margin-bottom: 8px; color: var(--ink); }
-    .loan-choice-card dl { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; margin: 0; font-size: 12px; }
-    .loan-choice-card dt { color: var(--muted); }
-    .loan-choice-card dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-weight: 600; }
-    .payment-button { width: 100%; min-height: 48px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; font: 700 16px 'DM Sans', sans-serif; cursor: pointer; }
-    .payment-button:disabled { opacity: .55; cursor: not-allowed; }
-    .payment-message { min-height: 18px; margin: 2px 0 0; color: #61716c; text-align: center; font-size: 12px; }
-    @media (max-width: 480px) { .payemi-main { padding: 48px 16px; } .payemi-card { padding: 25px 23px; } }
+    .loan-choice-card { display: block; border: 2px solid #e7ece9; border-radius: 17px; padding: 20px 21px 18px; background: #f7faf8; transition: border-color .16s ease, opacity .16s ease; }
+    .loan-choice input:checked + .loan-choice-card { border-color: #259448; }
+    .loan-choice input:focus-visible + .loan-choice-card { outline: 2px solid #239447; outline-offset: 3px; }
+    .loan-choice.is-disabled { cursor: not-allowed; }
+    .loan-choice.is-disabled .loan-choice-card { background: #fafbfa; opacity: .55; }
+    .loan-card-heading { display: flex; align-items: center; gap: 13px; }
+    .loan-radio { flex: 0 0 23px; width: 23px; height: 23px; border: 2px solid #929a95; border-radius: 50%; }
+    .loan-choice input:checked + .loan-choice-card .loan-radio { border: 6px solid #239447; }
+    .loan-choice.is-disabled .loan-radio { border-color: #c9cecb; }
+    .loan-name { color: #262523; font-size: 18px; font-weight: 700; }
+    .loan-badges { display: flex; gap: 8px; margin-left: auto; }
+    .loan-badge { border-radius: 999px; padding: 8px 12px; background: #dcefe1; color: #187b35; font-size: 13px; font-weight: 700; text-transform: uppercase; }
+    .loan-badge.inactive { background: #eceeed; color: #777b79; }
+    .loan-badge.overdue { background: #f9e9e7; color: #d66e67; }
+    .loan-due-amount { display: block; margin: 12px 0 12px 42px; color: #168a2b; font: 700 29px 'Space Grotesk', sans-serif; }
+    .loan-meta { margin: 0 0 0 42px; color: #858785; font-size: 15px; line-height: 1.5; }
+    .payment-button { width: 100%; min-height: 68px; border: 0; border-radius: 15px; background: #239447; color: #fff; font: 700 19px 'DM Sans', sans-serif; cursor: pointer; }
+    .payment-button:disabled { background: #cbd6ce; color: #fff; cursor: not-allowed; }
+    .payment-button span { margin-left: 9px; font-size: 23px; vertical-align: -1px; }
+    .payment-message { min-height: 18px; margin: -8px 0 0; color: #61716c; text-align: center; font-size: 12px; }
+    .security-note { margin-top: 0; padding-top: 8px; border-top: 0; font-size: 14px; }
+    .payemi-card.loan-mode .security-note { margin-top: 4px; }
+    @media (max-width: 560px) {
+      .payemi-main { min-height: 0; padding: 38px 14px; }
+      .loan-results-mode .payemi-main { min-height: 100vh; padding: 16px 14px; }
+      .payemi-card { padding: 28px 20px 22px; border-radius: 26px; }
+      .loan-results h2 { font-size: 27px; }
+      .loan-results-intro { font-size: 16px; }
+      .no-loans { padding: 28px 18px; }
+      .no-loans h3 { font-size: 20px; }
+      .no-loans p { font-size: 15px; }
+      .loan-choice-card { padding: 16px 13px; }
+      .loan-card-heading { gap: 9px; }
+      .loan-name { font-size: 16px; }
+      .loan-badges { gap: 5px; }
+      .loan-badge { padding: 7px 8px; font-size: 10px; }
+      .loan-due-amount { margin-left: 32px; font-size: 26px; }
+      .loan-meta { margin-left: 32px; font-size: 13px; }
+    }
+    @media (max-width: 360px) { .loan-badges { flex-direction: column; align-items: flex-end; } }
   </style>
 </head>
 <body>
@@ -70,12 +110,14 @@
       <div class="form-message" id="pan-message" role="status" aria-live="polite"></div>
     </form>
     <section class="loan-results" id="loan-results" aria-labelledby="loan-results-title" hidden>
-      <h2 id="loan-results-title">Select your loan</h2>
+      <button class="different-pan" id="different-pan" type="button"><span aria-hidden="true">←</span> Use a different PAN</button>
+      <h2 id="loan-results-title">Your Loans</h2>
+      <p class="loan-results-intro" id="loan-results-intro">Select the loan you want to repay.</p>
       <div class="loan-list" id="loan-list"></div>
-      <button class="payment-button" id="pay-selected-loan" type="button" disabled>Continue to payment</button>
+      <button class="payment-button" id="pay-selected-loan" type="button" disabled>Repay Now <span aria-hidden="true">→</span></button>
       <p class="payment-message" id="payment-message" role="status" aria-live="polite"></p>
     </section>
-    <div class="security-note"><span aria-hidden="true">♧</span> Secured by SSL encryption</div>
+    <div class="security-note"><span aria-hidden="true">🔒</span> Secure payments powered by Easebuzz</div>
     </section>
   </main>
   <footer id="footer" class="site-footer"><div class="footer-top"><div class="footer-brand"><a class="brand brand-footer" href="/#top"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>Vridora <b>Capital</b></span></a><p>Helping India's everyday entrepreneurs move forward with clear, responsible vehicle finance.</p><div class="social-links" aria-label="Social media"><a href="#footer" aria-label="LinkedIn">in</a><a href="#footer" aria-label="Instagram">ig</a><a href="#footer" aria-label="Facebook">f</a></div></div><div class="footer-column"><h3>Quick links</h3><a href="/#products">Our loans</a><a href="/#calculator">EMI calculator</a><a href="/#how-it-works">How it works</a><a href="/blog.html">Insights</a></div><div class="footer-column" id="support"><h3>Contact Us</h3><strong>HMB Investment Private Limited</strong><span>B-8, First Floor, New Multan Nagar,<br>New Delhi-110056<br>(Above HDFC Bank)</span><a href="tel:01145564490">011-45564490</a><a href="tel:43464490">43464490</a><a href="mailto:info@vridoracapital.com">info@vridoracapital.com</a></div></div><div class="footer-bottom"><span>© 2026 HMB Investment Private Limited. All rights reserved.</span><span>Fair lending. Clear communication. Human support.</span><div class="footer-legal"><a href="privacy-policy/index.html">Privacy policy</a><a href="terms-and-conditions/index.html">Terms &amp; conditions</a></div></div></footer>
@@ -95,20 +137,29 @@
     const loanList = document.querySelector('#loan-list');
     const paySelectedLoan = document.querySelector('#pay-selected-loan');
     const paymentMessage = document.querySelector('#payment-message');
+    const differentPanButton = document.querySelector('#different-pan');
+    const payemiCard = document.querySelector('.payemi-card');
+    const loanResultsIntro = document.querySelector('#loan-results-intro');
     let lookupPan = '';
     let selectedLoanIdentifier = '';
+    let selectedLoanAmount = 0;
+
+    function updatePayButtonLabel() {
+      const amountLabel = selectedLoanAmount > 0 ? ` ₹${Math.round(selectedLoanAmount).toLocaleString('en-IN')}` : '';
+      paySelectedLoan.innerHTML = `Repay Now${amountLabel} <span aria-hidden="true">→</span>`;
+    }
 
     panInput.addEventListener('input', () => {
       panInput.value = panInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
       panMessage.textContent = '';
       loanResults.hidden = true;
       selectedLoanIdentifier = '';
+      selectedLoanAmount = 0;
       paySelectedLoan.disabled = true;
+      updatePayButtonLabel();
       paymentMessage.textContent = '';
     });
 
-    const loanFieldPattern = /loan|emi|installment|due|outstanding|balance|account|tenure|status|amount/i;
-    const privateFieldPattern = /pan|phone|mobile|email|address|customer.?name|borrower.?name|contact.?id|lead.?id/i;
     const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'loandtlsid', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
 
     function hasLoanIdentifier(value) {
@@ -134,68 +185,120 @@
       return field ? String(field[1]) : '';
     }
 
-    function formatLoanLabel(key) {
-      return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, (letter) => letter.toUpperCase());
-    }
-
     function renderLoanResults(payload) {
       const loans = collectLoanRecords(payload);
       loanList.replaceChildren();
       selectedLoanIdentifier = '';
+      selectedLoanAmount = 0;
       paySelectedLoan.disabled = true;
+      updatePayButtonLabel();
       if (!loans.length) {
-        loanResults.hidden = true;
-        panMessage.textContent = payload?.message || payload?.msg || 'No loan details were found for this PAN.';
+        const emptyState = document.createElement('div');
+        emptyState.className = 'no-loans';
+        const title = document.createElement('h3');
+        title.textContent = 'No loans found';
+        const message = document.createElement('p');
+        message.textContent = 'We could not find any outstanding loan against this PAN. If you think this is a mistake, please contact support.';
+        emptyState.append(title, message);
+        loanList.append(emptyState);
+        loanResultsIntro.hidden = true;
+        payemiCard.classList.add('loan-mode');
+        document.body.classList.add('loan-results-mode');
+        loanResults.hidden = false;
+        panMessage.textContent = '';
         return;
       }
 
+      loanResultsIntro.hidden = false;
+      document.body.classList.add('loan-results-mode');
       loans.forEach((loan, index) => {
         const identifier = findLoanIdentifier(loan);
+        const upcomingEmi = loan.upcoming_emi && typeof loan.upcoming_emi === 'object' ? loan.upcoming_emi : {};
+        const emiAmount = Number(upcomingEmi.amount);
+        const loanStatus = String(loan.loan_status || upcomingEmi.status || '').trim().toLowerCase();
+        const isOverdue = loan.is_overdue === true || String(loan.is_overdue).toLowerCase() === 'true' || loanStatus.includes('overdue');
+        const isActive = loanStatus === 'active' && !isOverdue;
+        const isPayable = isActive && Number.isFinite(emiAmount) && emiAmount > 0;
         const label = document.createElement('label');
         label.className = 'loan-choice';
+        if (!isPayable) label.classList.add('is-disabled');
         const radio = document.createElement('input');
         radio.type = 'radio';
         radio.name = 'selected-loan';
         radio.value = String(index);
-        radio.disabled = !identifier;
+        radio.disabled = !identifier || !isPayable;
         radio.addEventListener('change', () => {
           selectedLoanIdentifier = identifier;
+          selectedLoanAmount = emiAmount;
           paySelectedLoan.disabled = false;
+          updatePayButtonLabel();
           paymentMessage.textContent = '';
         });
 
         const card = document.createElement('span');
         card.className = 'loan-choice-card';
+        const cardHeading = document.createElement('span');
+        cardHeading.className = 'loan-card-heading';
+        const radioVisual = document.createElement('span');
+        radioVisual.className = 'loan-radio';
+        radioVisual.setAttribute('aria-hidden', 'true');
         const title = document.createElement('strong');
-        title.textContent = `Loan ${index + 1}`;
-        const details = document.createElement('dl');
-        Object.entries(loan).forEach(([key, value]) => {
-          if (key === 'upcoming_emi' && value && typeof value === 'object') {
-            Object.entries(value).forEach(([emiKey, emiValue]) => {
-              if (!['amount', 'due_date', 'status'].includes(emiKey) || emiValue == null || typeof emiValue === 'object') return;
-              const term = document.createElement('dt');
-              const detail = document.createElement('dd');
-              term.textContent = `Upcoming EMI ${formatLoanLabel(emiKey)}`;
-              detail.textContent = String(emiValue);
-              details.append(term, detail);
-            });
-            return;
-          }
-          if (!loanFieldPattern.test(key) || privateFieldPattern.test(key) || value == null || typeof value === 'object') return;
-          const term = document.createElement('dt');
-          const detail = document.createElement('dd');
-          term.textContent = formatLoanLabel(key);
-          detail.textContent = String(value);
-          details.append(term, detail);
-        });
-        card.append(title, details);
+        title.className = 'loan-name';
+        title.textContent = `Loan #${identifier || index + 1}`;
+        const badges = document.createElement('span');
+        badges.className = 'loan-badges';
+        const statusBadge = document.createElement('span');
+        statusBadge.className = `loan-badge ${isActive ? '' : 'inactive'}`.trim();
+        statusBadge.textContent = loanStatus ? loanStatus : 'Inactive';
+        badges.append(statusBadge);
+        if (isOverdue) {
+          const overdueBadge = document.createElement('span');
+          overdueBadge.className = 'loan-badge overdue';
+          overdueBadge.textContent = 'Overdue';
+          badges.append(overdueBadge);
+        }
+        cardHeading.append(radioVisual, title, badges);
+
+        const dueAmount = document.createElement('strong');
+        dueAmount.className = 'loan-due-amount';
+        dueAmount.textContent = Number.isFinite(emiAmount) ? `₹${Math.round(emiAmount).toLocaleString('en-IN')}` : 'Amount unavailable';
+
+        const metadata = document.createElement('p');
+        metadata.className = 'loan-meta';
+        const principal = Number(loan.loan_amount);
+        const days = Number(loan.number_of_days);
+        const dueDate = upcomingEmi.due_date ? new Date(upcomingEmi.due_date) : null;
+        const dueDateLabel = dueDate && !Number.isNaN(dueDate.getTime())
+          ? new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }).format(dueDate)
+          : '';
+        const metadataParts = [];
+        if (Number.isFinite(principal)) metadataParts.push(`Principal ₹${Math.round(principal).toLocaleString('en-IN')}`);
+        if (Number.isFinite(days)) metadataParts.push(`${days} days`);
+        if (dueDateLabel) metadataParts.push(`Due ${dueDateLabel}`);
+        metadata.textContent = metadataParts.join(' · ');
+        card.append(cardHeading, dueAmount, metadata);
         label.append(radio, card);
         loanList.append(label);
       });
 
+      payemiCard.classList.add('loan-mode');
       loanResults.hidden = false;
-      panMessage.textContent = `${loans.length} loan${loans.length === 1 ? '' : 's'} found.`;
+      panMessage.textContent = '';
     }
+
+    differentPanButton.addEventListener('click', () => {
+      loanResults.hidden = true;
+      payemiCard.classList.remove('loan-mode');
+      document.body.classList.remove('loan-results-mode');
+      panInput.value = '';
+      panMessage.textContent = '';
+      paymentMessage.textContent = '';
+      selectedLoanIdentifier = '';
+      selectedLoanAmount = 0;
+      paySelectedLoan.disabled = true;
+      updatePayButtonLabel();
+      panInput.focus();
+    });
 
     panForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -247,7 +350,7 @@
         paymentMessage.textContent = error.message || 'Could not create a payment link. Please try again.';
         paySelectedLoan.disabled = false;
       } finally {
-        paySelectedLoan.textContent = 'Continue to payment';
+        updatePayButtonLabel();
       }
     });
 
