@@ -109,25 +109,19 @@
 
     const loanFieldPattern = /loan|emi|installment|due|outstanding|balance|account|tenure|status|amount/i;
     const privateFieldPattern = /pan|phone|mobile|email|address|customer.?name|borrower.?name|contact.?id|lead.?id/i;
-    const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
+    const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'loandtlsid', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
+
+    function hasLoanIdentifier(value) {
+      return Object.entries(value).some(([key, fieldValue]) => loanIdentifierKeys.includes(key.toLowerCase().replace(/[^a-z0-9]/g, '')) && fieldValue != null && typeof fieldValue !== 'object');
+    }
 
     function collectLoanRecords(value, records = [], seen = new Set()) {
       if (!value || typeof value !== 'object') return records;
       if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (item && typeof item === 'object' && !Array.isArray(item)) {
-            const hasLoanFields = Object.entries(item).some(([key, fieldValue]) => loanFieldPattern.test(key) && fieldValue != null && typeof fieldValue !== 'object');
-            if (hasLoanFields && !seen.has(item)) {
-              seen.add(item);
-              records.push(item);
-            }
-          }
-          collectLoanRecords(item, records, seen);
-        });
+        value.forEach((item) => collectLoanRecords(item, records, seen));
         return records;
       }
-      const hasLoanFields = Object.entries(value).some(([key, fieldValue]) => loanFieldPattern.test(key) && fieldValue != null && typeof fieldValue !== 'object');
-      if (hasLoanFields && !seen.has(value)) {
+      if (hasLoanIdentifier(value) && !seen.has(value)) {
         seen.add(value);
         records.push(value);
       }
@@ -136,15 +130,8 @@
     }
 
     function findLoanIdentifier(loan) {
-      if (!loan || typeof loan !== 'object') return '';
-      for (const [key, value] of Object.entries(loan)) {
-        if (loanIdentifierKeys.includes(key.toLowerCase().replace(/[^a-z0-9]/g, '')) && value != null && typeof value !== 'object') return String(value);
-      }
-      for (const value of Object.values(loan)) {
-        const identifier = findLoanIdentifier(value);
-        if (identifier) return identifier;
-      }
-      return '';
+      const field = Object.entries(loan).find(([key, value]) => loanIdentifierKeys.includes(key.toLowerCase().replace(/[^a-z0-9]/g, '')) && value != null && typeof value !== 'object');
+      return field ? String(field[1]) : '';
     }
 
     function formatLoanLabel(key) {
@@ -183,6 +170,17 @@
         title.textContent = `Loan ${index + 1}`;
         const details = document.createElement('dl');
         Object.entries(loan).forEach(([key, value]) => {
+          if (key === 'upcoming_emi' && value && typeof value === 'object') {
+            Object.entries(value).forEach(([emiKey, emiValue]) => {
+              if (!['amount', 'due_date', 'status'].includes(emiKey) || emiValue == null || typeof emiValue === 'object') return;
+              const term = document.createElement('dt');
+              const detail = document.createElement('dd');
+              term.textContent = `Upcoming EMI ${formatLoanLabel(emiKey)}`;
+              detail.textContent = String(emiValue);
+              details.append(term, detail);
+            });
+            return;
+          }
           if (!loanFieldPattern.test(key) || privateFieldPattern.test(key) || value == null || typeof value === 'object') return;
           const term = document.createElement('dt');
           const detail = document.createElement('dd');
