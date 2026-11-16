@@ -30,6 +30,22 @@
     .security-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 22px; padding-top: 17px; border-top: 1px solid var(--line); color: #6e7785; font-size: 12px; }
     .security-note span { color: #65717e; font-size: 18px; }
     .form-message { min-height: 18px; margin-top: 10px; color: #bd604e; text-align: center; font-size: 12px; }
+    .loan-results { display: grid; gap: 12px; margin-top: 22px; }
+    .loan-results[hidden] { display: none; }
+    .loan-results h2 { margin: 0; color: var(--ink); font: 600 18px 'Space Grotesk', sans-serif; }
+    .loan-list { display: grid; gap: 10px; }
+    .loan-choice { display: block; margin: 0; cursor: pointer; }
+    .loan-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .loan-choice-card { display: block; border: 1px solid #cbd3dd; border-radius: 6px; padding: 13px; }
+    .loan-choice input:checked + .loan-choice-card { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(8,118,209,.13); }
+    .loan-choice input:focus-visible + .loan-choice-card { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .loan-choice-card strong { display: block; margin-bottom: 8px; color: var(--ink); }
+    .loan-choice-card dl { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; margin: 0; font-size: 12px; }
+    .loan-choice-card dt { color: var(--muted); }
+    .loan-choice-card dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-weight: 600; }
+    .payment-button { width: 100%; min-height: 48px; border: 0; border-radius: 6px; background: var(--ink); color: #fff; font: 700 16px 'DM Sans', sans-serif; cursor: pointer; }
+    .payment-button:disabled { opacity: .55; cursor: not-allowed; }
+    .payment-message { min-height: 18px; margin: 2px 0 0; color: #61716c; text-align: center; font-size: 12px; }
     @media (max-width: 480px) { .payemi-main { padding: 48px 16px; } .payemi-card { padding: 25px 23px; } }
   </style>
 </head>
@@ -53,6 +69,12 @@
       <button class="submit-button" type="submit">Get Available Loans <span aria-hidden="true">→</span></button>
       <div class="form-message" id="pan-message" role="status" aria-live="polite"></div>
     </form>
+    <section class="loan-results" id="loan-results" aria-labelledby="loan-results-title" hidden>
+      <h2 id="loan-results-title">Select your loan</h2>
+      <div class="loan-list" id="loan-list"></div>
+      <button class="payment-button" id="pay-selected-loan" type="button" disabled>Continue to payment</button>
+      <p class="payment-message" id="payment-message" role="status" aria-live="polite"></p>
+    </section>
     <div class="security-note"><span aria-hidden="true">♧</span> Secured by SSL encryption</div>
     </section>
   </main>
@@ -69,13 +91,115 @@
     const panForm = document.querySelector('#pan-form');
     const panInput = document.querySelector('#pan-number');
     const panMessage = document.querySelector('#pan-message');
+    const loanResults = document.querySelector('#loan-results');
+    const loanList = document.querySelector('#loan-list');
+    const paySelectedLoan = document.querySelector('#pay-selected-loan');
+    const paymentMessage = document.querySelector('#payment-message');
+    let lookupPan = '';
+    let selectedLoanIdentifier = '';
 
     panInput.addEventListener('input', () => {
       panInput.value = panInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
       panMessage.textContent = '';
+      loanResults.hidden = true;
+      selectedLoanIdentifier = '';
+      paySelectedLoan.disabled = true;
+      paymentMessage.textContent = '';
     });
 
-    panForm.addEventListener('submit', (event) => {
+    const loanFieldPattern = /loan|emi|installment|due|outstanding|balance|account|tenure|status|amount/i;
+    const privateFieldPattern = /pan|phone|mobile|email|address|customer.?name|borrower.?name|contact.?id|lead.?id/i;
+    const loanIdentifierKeys = ['loanid', 'loanaccountid', 'loanaccountnumber', 'loanaccountno', 'accountnumber', 'loanreference', 'loanref', 'applicationid'];
+
+    function collectLoanRecords(value, records = [], seen = new Set()) {
+      if (!value || typeof value !== 'object') return records;
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item && typeof item === 'object' && !Array.isArray(item)) {
+            const hasLoanFields = Object.entries(item).some(([key, fieldValue]) => loanFieldPattern.test(key) && fieldValue != null && typeof fieldValue !== 'object');
+            if (hasLoanFields && !seen.has(item)) {
+              seen.add(item);
+              records.push(item);
+            }
+          }
+          collectLoanRecords(item, records, seen);
+        });
+        return records;
+      }
+      const hasLoanFields = Object.entries(value).some(([key, fieldValue]) => loanFieldPattern.test(key) && fieldValue != null && typeof fieldValue !== 'object');
+      if (hasLoanFields && !seen.has(value)) {
+        seen.add(value);
+        records.push(value);
+      }
+      Object.values(value).forEach((item) => collectLoanRecords(item, records, seen));
+      return records;
+    }
+
+    function findLoanIdentifier(loan) {
+      if (!loan || typeof loan !== 'object') return '';
+      for (const [key, value] of Object.entries(loan)) {
+        if (loanIdentifierKeys.includes(key.toLowerCase().replace(/[^a-z0-9]/g, '')) && value != null && typeof value !== 'object') return String(value);
+      }
+      for (const value of Object.values(loan)) {
+        const identifier = findLoanIdentifier(value);
+        if (identifier) return identifier;
+      }
+      return '';
+    }
+
+    function formatLoanLabel(key) {
+      return key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, (letter) => letter.toUpperCase());
+    }
+
+    function renderLoanResults(payload) {
+      const loans = collectLoanRecords(payload);
+      loanList.replaceChildren();
+      selectedLoanIdentifier = '';
+      paySelectedLoan.disabled = true;
+      if (!loans.length) {
+        loanResults.hidden = true;
+        panMessage.textContent = payload?.message || payload?.msg || 'No loan details were found for this PAN.';
+        return;
+      }
+
+      loans.forEach((loan, index) => {
+        const identifier = findLoanIdentifier(loan);
+        const label = document.createElement('label');
+        label.className = 'loan-choice';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'selected-loan';
+        radio.value = String(index);
+        radio.disabled = !identifier;
+        radio.addEventListener('change', () => {
+          selectedLoanIdentifier = identifier;
+          paySelectedLoan.disabled = false;
+          paymentMessage.textContent = '';
+        });
+
+        const card = document.createElement('span');
+        card.className = 'loan-choice-card';
+        const title = document.createElement('strong');
+        title.textContent = `Loan ${index + 1}`;
+        const details = document.createElement('dl');
+        Object.entries(loan).forEach(([key, value]) => {
+          if (!loanFieldPattern.test(key) || privateFieldPattern.test(key) || value == null || typeof value === 'object') return;
+          const term = document.createElement('dt');
+          const detail = document.createElement('dd');
+          term.textContent = formatLoanLabel(key);
+          detail.textContent = String(value);
+          details.append(term, detail);
+        });
+        card.append(title, details);
+        label.append(radio, card);
+        loanList.append(label);
+      });
+
+      loanResults.hidden = false;
+      panMessage.textContent = `${loans.length} loan${loans.length === 1 ? '' : 's'} found.`;
+    }
+
+    panForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const pan = panInput.value.trim();
       if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
@@ -83,7 +207,50 @@
         panInput.focus();
         return;
       }
-      panMessage.textContent = 'PAN verified. Available loan options will appear shortly.';
+
+      const submitButton = panForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Searching...';
+      panMessage.textContent = 'Fetching your loan details...';
+      loanResults.hidden = true;
+      lookupPan = pan;
+      try {
+        const response = await fetch('/api/loan-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ panNumber: pan })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Loan lookup failed. Please try again.');
+        renderLoanResults(result);
+      } catch (error) {
+        panMessage.textContent = error.message || 'Unable to fetch loan details. Please try again.';
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Get Available Loans <span aria-hidden="true">→</span>';
+      }
+    });
+
+    paySelectedLoan.addEventListener('click', async () => {
+      if (!lookupPan || !selectedLoanIdentifier) return;
+      paySelectedLoan.disabled = true;
+      paySelectedLoan.textContent = 'Creating payment link...';
+      paymentMessage.textContent = 'Please wait while we prepare your payment.';
+      try {
+        const response = await fetch('/api/create-payment-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ panNumber: lookupPan, loanIdentifier: selectedLoanIdentifier })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.paymentUrl) throw new Error(result.message || 'Could not create a payment link. Please contact support.');
+        window.location.assign(result.paymentUrl);
+      } catch (error) {
+        paymentMessage.textContent = error.message || 'Could not create a payment link. Please try again.';
+        paySelectedLoan.disabled = false;
+      } finally {
+        paySelectedLoan.textContent = 'Continue to payment';
+      }
     });
 
   </script>
